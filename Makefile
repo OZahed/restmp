@@ -1,6 +1,7 @@
 BUILD_BRANCH=$$(git rev-parse --abbrev-ref HEAD)
 BUILD_INFO_PKG=github.com/OZahed/restmp/configs
 BUILD_TIME =$$(date '+FT%T')
+BUILD_TAG=$$(git describe --abbrev=0 )
 
 APP_NAME=restmp # override it
 
@@ -17,7 +18,7 @@ build-static:
 	CGO_ENABLED=1 go build -v -o $(APP) -a -installsuffix cgo -ldflags $(LDFLAGS) .
 
 build-docker:
-	docker build restmp my
+	docker build $(APP_NAME):$(BUILD_TAG) .
 
 install:
 	CGO_ENABLED=1 go install -ldflags $(LDFLAGS)

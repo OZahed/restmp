@@ -1,14 +1,13 @@
 BUILD_BRANCH=$$(git rev-parse --abbrev-ref HEAD)
-BUILD_INFO_PKG=github.com/OZahed/restmp/configs
+BUILD_INFO_PKG=github.com/OZahed/restmp/internal/configs
 BUILD_TIME =$$(date '+FT%T')
 BUILD_TAG=$$(git describe --abbrev=0 )
 
-APP_NAME=restmp # override it
 
 # Did not use ldflags because in build time if we forgot using ldflags we get no errors
-export APP_NAME=$(APP_NAME)
+export APP_NAME=restmp
 export ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-export LDFLAGS="-X $(BUILD_INFO_PKG).BuildTime=$(BUILD_TIME) -X $(BUILD_INFO_PKG).GitHash=$(git rev-parse HEAD | cut -c 1-8) -X $(BUILD_INFO_PKG).GitBranch=$(BUILD_BRANCH)"
+export LDFLAGS="-s -w -X $(BUILD_INFO_PKG).appname=$(APP_NAME) -X $(BUILD_INFO_PKG).build=$(BUILD_TIME) -X $(BUILD_INFO_PKG).commit=$(git rev-parse HEAD | cut -c 1-8) -X $(BUILD_INFO_PKG).branch=$(BUILD_BRANCH) -X $(BUILD_INFO_PKG).tag=$(BUILD_TAG)"
 
 build: swagger
 	CGO_ENABLED=1 go build -ldflags $(LDFLAGS)  .

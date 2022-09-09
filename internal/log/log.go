@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type LOG_LEVEL zapcore.Level
+type LOG_LEVEL int8
 
 const (
 	L_DEBUG int8 = iota - 1
@@ -24,36 +24,34 @@ var (
 const logLayout = "2006-01-02 15:04:05.000"
 
 // init: Set NewProduction as default logger. Config depend on Logger instance
-func Initialize(_ context.Context, l LOG_LEVEL) {
+func Initialize(_ context.Context, l LOG_LEVEL) error {
 	var err error
 	Level = zap.NewAtomicLevelAt(zapcore.Level(l))
 	Logger, err = zap.Config{
-		Level:             Level,
-		Development:       false,
-		Encoding:          "json",
-		DisableStacktrace: true,
-		DisableCaller:     true,
-		OutputPaths:       []string{"stdout"},
-		ErrorOutputPaths:  []string{"stderr"},
+		Level:            Level,
+		Development:      false,
+		Encoding:         "json",
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
 		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:        "ts",
+			TimeKey:        "time",
 			EncodeTime:     zapcore.TimeEncoderOfLayout(logLayout),
 			EncodeDuration: zapcore.StringDurationEncoder,
-
-			LevelKey:    "level",
-			EncodeLevel: zapcore.CapitalLevelEncoder,
-
-			NameKey:     "key",
-			FunctionKey: zapcore.OmitKey,
-
-			MessageKey: "msg",
-			LineEnding: zapcore.DefaultLineEnding,
+			LevelKey:       "level",
+			EncodeLevel:    zapcore.CapitalLevelEncoder,
+			NameKey:        "name",
+			EncodeName:     zapcore.FullNameEncoder,
+			CallerKey:      "caller",
+			EncodeCaller:   zapcore.FullCallerEncoder,
+			MessageKey:     "msg",
+			LineEnding:     zapcore.DefaultLineEnding,
 		},
 	}.Build()
 
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 func Finalize() error {
